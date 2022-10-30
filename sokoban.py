@@ -88,11 +88,11 @@ class Sokoban(SearchProblem):
             ady_caja = calcularAdy(fila,columna,direccion)
             if destino not in Paredes and destino not in cajas:
                 #no hay ningún obstaculo, muevo
-                acciones_disponibles.append(direccion, "mov")
+                acciones_disponibles.append(destino, "mov")
             elif destino not in Paredes and destino in cajas:
                 #si no es pared, hay una caja
                 if ady_caja not in Paredes and ady_caja not in cajas:
-                    acciones_disponibles.append(direccion, "caja")
+                    acciones_disponibles.append(destino, "caja")
                 
         return acciones_disponibles
             
