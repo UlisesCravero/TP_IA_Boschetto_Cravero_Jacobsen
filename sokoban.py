@@ -10,7 +10,7 @@ from simpleai.search import (
 )
 from simpleai.search.viewers import WebViewer, BaseViewer
 
-        #((Xpj,Ypj), ListaCajas)
+        #((fila_pj,columna_pj), ListaCajas)
 inicio_Jugador = (1,1)
           #pos jugador     pos cajas
 INITIAL = ((1,1), ((2,2),(2,3)))
@@ -27,65 +27,65 @@ Objetivos = (
     (2,4)
 )
 Paredes = (
-    # pared vertical izquierda
     (0,0),
-    (0,1),
-    (0,2),
-    (0,3),    
-    # pared horizontal arriba    
     (1,0),
     (2,0),
-    (3,0),
-    (4,0),
-
+    (3,0),   
+    (0,1),
+    (0,2),
+    (0,3),
     (0,4),
-    (1,4),
-    (1,5),
-
-    (2,5),
-    (3,5),
-    (4,5),    
-
+    (4,0),
     (4,1),
-    (4,2),
-    (4,3),
+    (5,1),
+    (5,2),
+    (5,3),
+    (5,4),    
+    (1,4),
+    (2,4),
+    (3,4),
     (4,4),
-    
-
 )
 
-def calcularAdy(x,y,accion):
+#una función jugar que recibirá como parámetros el mapa (paredes), 
+# las posiciones actuales de las cajas y el jugador, las posiciones objetivos,
+#  y la cantidad máxima de movimientos
+
+def jugar(self, paredes,posiciones_cajas, posicion_jugador, objetivos,cant_max_movimientos):
+    return ...
+
+
+
+def calcularAdy(fila,columna,accion):
         if accion == "izquierda":
-            return (x+1,y)
+            return (fila, columna-1)
         if accion == "derecha":
-            return (x-1,y)
+            return (fila, columna+1)
         if accion == "arriba":
-            return (x, y-1)
+            return (fila-1,columna)
         if accion == "abajo":
-            return (x, y+1)
+            return (fila+1,columna)
 
 class Sokoban(SearchProblem):
-
-    
 
     def actions(self, state):
         acciones_disponibles = []
         # las acciones son 4: arriba, abajo, izuquierda, derecha
        
         pos_pj, cajas = state
-        x_pj, y_pj = pos_pj
+        fila_pj, col_pj = pos_pj
         adyacentes = [
-            ((x_pj, y_pj + 1), "abajo"),
-            ((x_pj, y_pj - 1),"arriba"), 
-            ((x_pj + 1, y_pj), "derecha"),
-            ((x_pj - 1, y_pj), "izquierda")
+            ((fila_pj, col_pj + 1), "derecha"),
+            ((fila_pj, col_pj - 1),"izquierda"), 
+            ((fila_pj + 1, col_pj), "abajo"),
+            ((fila_pj - 1, col_pj), "arriba")
         ]
 
 
         for (destino, direccion) in adyacentes:
             #if direccion == "izquierda":
-            x, y = destino
-            ady_caja = calcularAdy(x,y,direccion)
+            fila, columna = destino
+            ady_caja = calcularAdy(fila,columna,direccion)
             if destino not in Paredes and destino not in cajas:
                 #no hay ningún obstaculo, muevo
                 acciones_disponibles.append(direccion, "mov")
@@ -102,14 +102,14 @@ class Sokoban(SearchProblem):
         # ejemplo "izquierda", "derecha"
 
         pos_pj, cajas = state
-        x_pj, y_pj = pos_pj 
+        fila_pj, col_pj = pos_pj 
         accion, tipo = action
-        destino = calcularAdy(x_pj,y_pj, accion)
+        destino = calcularAdy(fila_pj,col_pj, accion)
         if tipo == "mov":
             return (destino, cajas)
         if tipo == "caja":
-            x_des_pj, y_des_pj = destino
-            destino_caja = calcularAdy(x_des_pj,y_des_pj, accion)
+            fila_des_pj, col_des_pj = destino
+            destino_caja = calcularAdy(fila_des_pj,col_des_pj, accion)
             #mover caja
             cajas_modificadas = cajas #FALTA MOVER LA CAJA EN ESTO
             return (destino,cajas_modificadas)
