@@ -106,44 +106,74 @@ class Sokoban(SearchProblem):
         accion, tipo = action
         destino = calcularAdy(fila_pj,col_pj, accion)
         if tipo == "mov":
-            return (destino, cajas)
+            return tuple(destino, cajas)
         if tipo == "caja":
             fila_des_pj, col_des_pj = destino
             destino_caja = calcularAdy(fila_des_pj,col_des_pj, accion)
-            #mover caja
-            cajas_modificadas = cajas #FALTA MOVER LA CAJA EN ESTO
-            return (destino,cajas_modificadas)
+            cajas_modificadas = []
+            for caja in cajas:
+                if caja == destino:
+                    #debo mover la caja al destino
+                    cajas_modificadas.append(destino_caja)
+                else:
+                    cajas_modificadas.append(caja)
+            return tuple(destino,tuple(cajas_modificadas))
 
 
     def cost(self, state1, action, state2):
-        
-        return ...
+        # costo 1 porque se intenta encontrar la solución en la menor cantidad de movimientos posibles
+        return 1
         
 
     def is_goal(self, state):
-        hab_bombero, hab_restante = state
-        return ...
+        _, cajas = state
+        for caja in cajas:
+            if caja not in Objetivos:
+                return False
+        return True
 
 
     def heuristic(self, state):
-        
-        heuristica = 0 
+        # cantidad de movimientos que le faltan a cada caja para
+        # llegar al objetivo más cercano
+        _ , cajas = state
+        heuristica = 0
+        for caja in cajas:
+            if caja not in Objetivos:
+                f_caja, c_caja = caja
+                objetivo_cercano = []
+                for (f_obj,c_obj) in Objetivos:
+                    objetivo_cercano.append(abs(f_caja - f_obj) + abs(c_caja - c_obj))
+                heuristica += min(objetivo_cercano)
+
         return heuristica
 
-        
+#viewer = WebViewer()
+viewer = BaseViewer()
+result = astar(Sokoban(INITIAL))
 
+print("Estado meta:")
+print(result.state)
 
+for action, state in result.path():
+    print("Haciendo", action, "llegué a:")
+    print(state)
 
-if __name__ == "__main__":
-    viewer = BaseViewer()
-    #result = depth_first(MisionerosProblem(INICIAL), graph_search=True, viewer=viewer)
-    #result = breadth_first(MisionerosProblem(INICIAL), graph_search=True, viewer=viewer)
-    result = astar(Sokoban(INITIAL), viewer=viewer)
+print("Profundidad:", len(list(result.path())))
 
-    for action, state in result.path():
-        print("Haciendo", action, "llegué a:")
-        print(state)
+print("Stats:")
 
-    print("Profundidad:", len(list(result.path())))
-    print("Stats:")
-    print(viewer.stats)
+print(viewer.stats)
+# if __name__ == "__main__":
+#     viewer = BaseViewer()
+#     #result = depth_first(MisionerosProblem(INICIAL), graph_search=True, viewer=viewer)
+#     #result = breadth_first(MisionerosProblem(INICIAL), graph_search=True, viewer=viewer)
+#     result = astar(Sokoban(INITIAL)) # , viewer=viewer
+
+#     for action, state in result.path():
+#         print("Haciendo", action, "llegué a:")
+#         print(state)
+
+#     print("Profundidad:", len(list(result.path())))
+#     print("Stats:")
+#     print(viewer.stats)
