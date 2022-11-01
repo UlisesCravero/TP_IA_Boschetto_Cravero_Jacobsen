@@ -30,7 +30,7 @@ columnas = list(range(mapa_resultante[1]))
 filas = list(range(mapa_resultante[0]))
 
 casilleros = [
-    (row, col)
+    (fil, col)
     for fil in filas
     for col in columnas
 ]
