@@ -48,8 +48,7 @@ PAREDES = [
     (3,4),
     (3,5),
     (3,6),
-
-    ] 
+] 
 
 
 
@@ -57,10 +56,10 @@ PAREDES = [
 # las posiciones actuales de las cajas y el jugador, las posiciones objetivos,
 #  y la cantidad máxima de movimientos
 
-def jugar( paredes,posiciones_cajas, posicion_jugador, objetivos,cant_max_movimientos):
+def jugar( paredes,cajas,objetivos, jugador,maximos_movimientos):
             #todas las posiciones respetan (fila,columna)
             #tuplca con la posición del jugar, array de tuplas con pusición de las cajas, cantidad máxima de movimientos
-    INITIAL = (posicion_jugador, tuple(tuple(caja) for caja in posiciones_cajas),cant_max_movimientos)
+    INITIAL = (jugador, tuple(tuple(caja) for caja in cajas),maximos_movimientos)
     
     # cambiar para no hacer esta asignación
     OBJETIVOS = tuple(tuple(obj) for obj in objetivos)
@@ -72,11 +71,9 @@ def jugar( paredes,posiciones_cajas, posicion_jugador, objetivos,cant_max_movimi
     pasos = astar(Sokoban(INITIAL))
     for accion, estado in pasos.path():
         if accion is not None:
-            secuencia_movimientos.append(accion)
-            print("Action:", accion[2], "Cajas:", estado[1])
-    # for accion,estado in pasos.path():
-    #     secuencia_movimientos.append(accion)
-    #     print(accion)
+            secuencia_movimientos.append(accion[2])
+            #print("Action:", accion[2], "Cajas:", estado[1])
+    
     return secuencia_movimientos
 
 def calcularAdy(fila,columna,accion):
