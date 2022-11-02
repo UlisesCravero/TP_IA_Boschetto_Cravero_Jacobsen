@@ -19,7 +19,7 @@ def armar_mapa( filas, columnas, cantidad_paredes, cantidad_cajas_objetivos):
         PAREDES.append("pared{}").format(pared+1)
 
     #la cantidad de cajas y objetivos es la misma
-    for caja_obj in cantidad_paredes:
+    for caja_obj in cantidad_cajas_objetivos:
         CAJAS.append("caja{}").format(caja_obj+1)
         OBJETIVOS.append("objetivo{}").format(caja_obj+1)
 
@@ -46,17 +46,30 @@ def armar_mapa( filas, columnas, cantidad_paredes, cantidad_cajas_objetivos):
     def different(problem_variables, values):
         celda1, celda2 = values
         return celda1 != celda2
-
-
-        
+ 
+   
     # las cajas, paredes y pj no pueden estar en el mismo lugar
     PJ_CAJAS_PAREDES = "PJ" + CAJAS + PAREDES
     for celda1, celda2 in combinations(PJ_CAJAS_PAREDES,2):
         constraints.append(((celda1, celda2), different))
 
-    
+    # los objetivos no deben estar arriba de una una pared 
+    OBJ_PAREDES = OBJETIVOS + PAREDES
+    for celda1, celda2 in combinations(OBJ_PAREDES,2):
+        constraints.append(((celda1, celda2), different))
 
-    # restriccion global para mirar que no todas las cajas esten en los objetivos
+    
+    # Restriccion que el juego no esté ganado
+
+    # Restriccion de mas de una pared adyacente
+
+    # Restriccion de no ubicar cajas en esquinas
+
+
+
+
+
+
 
     # TODO 2:
     # agregar todas las restricciones de que sean diferentes las celdas dentro de cada mega-cuadrado (de 3x3)
