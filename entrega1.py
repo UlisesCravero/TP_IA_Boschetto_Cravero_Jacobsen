@@ -19,36 +19,36 @@ from simpleai.search.viewers import WebViewer, BaseViewer
 # INITIAL = ((1,1), ((2,2),(2,3)), 10)
 
 
-OBJETIVOS = [
-    (1,1),
-    (1,5)
-]
-pj_inicial = (2,3)
-cajas = [(1,2),(1,4)]
-#PAREDES
-PAREDES = [
-    (0,0),
-    (0,1),
-    (0,2),
-    (0,3),
-    (0,4),
-    (0,5),
-    (0,6),
+# OBJETIVOS = [
+#     (1,1),
+#     (1,5)
+# ]
+# pj_inicial = (2,3)
+# cajas = [(1,2),(1,4)]
+# #PAREDES
+# PAREDES = [
+#     (0,0),
+#     (0,1),
+#     (0,2),
+#     (0,3),
+#     (0,4),
+#     (0,5),
+#     (0,6),
 
-    (1,0),
-    (1,6),
+#     (1,0),
+#     (1,6),
 
-    (2,0),
-    (2,6),
+#     (2,0),
+#     (2,6),
 
-    (3,0),
-    (3,1),
-    (3,2),
-    (3,3),
-    (3,4),
-    (3,5),
-    (3,6),
-] 
+#     (3,0),
+#     (3,1),
+#     (3,2),
+#     (3,3),
+#     (3,4),
+#     (3,5),
+#     (3,6),
+# ] 
 
 
 
@@ -56,19 +56,23 @@ PAREDES = [
 # las posiciones actuales de las cajas y el jugador, las posiciones objetivos,
 #  y la cantidad máxima de movimientos
 
-def jugar( paredes,cajas,objetivos, jugador,maximos_movimientos):
+
+def jugar(paredes,cajas,objetivos, jugador,maximos_movimientos):
             #todas las posiciones respetan (fila,columna)
             #tuplca con la posición del jugar, array de tuplas con pusición de las cajas, cantidad máxima de movimientos
-    INITIAL = (jugador, tuple(tuple(caja) for caja in cajas),maximos_movimientos)
-    
+    #INITIAL = (jugador, tuple(tuple(caja) for caja in cajas),maximos_movimientos)   
+
     # cambiar para no hacer esta asignación
-    OBJETIVOS = tuple(tuple(obj) for obj in objetivos)
-    PAREDES = tuple(tuple(pared) for pared in paredes)
+    
+    #OBJETIVOS = tuple(tuple(obj) for obj in objetivos)
+    #PAREDES = tuple(tuple(pared) for pared in paredes)
     
     #secuencia de movimientos
     secuencia_movimientos = []
 
-    pasos = astar(Sokoban(INITIAL))
+    pasos = astar(Sokoban((jugador, tuple(tuple(caja) for caja in cajas),maximos_movimientos),
+                        tuple(tuple(obj) for obj in objetivos),
+                        tuple(tuple(pared) for pared in paredes)))
     for accion, estado in pasos.path():
         if accion is not None:
             secuencia_movimientos.append(accion[2])
@@ -88,6 +92,12 @@ def calcularAdy(fila,columna,accion):
 
 class Sokoban(SearchProblem):
 
+    def __init__(self,INITIAL, OBJETIVOS, PAREDES):
+        self.INITIAL = INITIAL
+        self.OBJETIVOS = OBJETIVOS
+        self.PAREDES = PAREDES
+        super().__init__(INITIAL)
+
     def actions(self, state):
         acciones_disponibles = []
         # estructura action = posicion_destino, tipo_movimiento, direccion
@@ -105,12 +115,12 @@ class Sokoban(SearchProblem):
             #if direccion == "izquierda":
             fila, columna = destino
             ady_caja = calcularAdy(fila,columna,direccion)
-            if destino not in PAREDES and destino not in cajas:
+            if destino not in self.PAREDES and destino not in cajas:
                 #no hay ningún obstaculo, muevo
                 acciones_disponibles.append((destino, "mov",direccion))
-            elif destino not in PAREDES and destino in cajas:
+            elif destino not in self.PAREDES and destino in cajas:
                 #si no es pared, hay una caja
-                if ady_caja not in PAREDES and ady_caja not in cajas:
+                if ady_caja not in self.PAREDES and ady_caja not in cajas:
                     acciones_disponibles.append((destino, "caja",direccion))
                 
         return acciones_disponibles
@@ -152,7 +162,7 @@ class Sokoban(SearchProblem):
     def is_goal(self, state):
         _, cajas, _ = state
         for caja in cajas:
-            if caja not in OBJETIVOS:
+            if caja not in self.OBJETIVOS:
                 return False
         return True
 
@@ -162,17 +172,18 @@ class Sokoban(SearchProblem):
         # llegar al objetivo más cercano
         _ , cajas, _ = state
         heuristica = 0
+        #print(OBJETIVOS)
         for caja in cajas:
-            if caja not in OBJETIVOS:
+            if caja not in self.OBJETIVOS:
                 f_caja, c_caja = caja
                 objetivo_cercano = []
-                for (f_obj,c_obj) in OBJETIVOS:
+                for (f_obj,c_obj) in self.OBJETIVOS:
                     objetivo_cercano.append(abs(f_caja - f_obj) + abs(c_caja - c_obj))
                 heuristica += min(objetivo_cercano)
         return heuristica
 
 
 
-#def jugar(self, paredes,posiciones_cajas, posicion_jugador, objetivos,cant_max_movimientos):
-movimientos = jugar(PAREDES,cajas,pj_inicial,OBJETIVOS,20)
+
+#movimientos = jugar(PAREDES,cajas,pj_inicial,OBJETIVOS,20)
 
