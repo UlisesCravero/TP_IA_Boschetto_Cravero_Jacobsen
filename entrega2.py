@@ -1,67 +1,68 @@
 from itertools import combinations
-
 from simpleai.search import CspProblem, backtrack
 
-def armar_mapa(self, filas, columnas, cantidad_paredes, cantidad_cajas_objetivos):
-    return (filas, columnas,cantidad_paredes,cantidad_cajas_objetivos)
+def armar_mapa( filas, columnas, cantidad_paredes, cantidad_cajas_objetivos):
+    
+    #mapa_resultante =  armar_mapa(5,4,3,2)
+    if filas != columnas:
+        print("es rectangulo") #CAMBIAR
 
-mapa_resultante =  armar_mapa(5,4,3,2)
-
-problem_variables = []
-CAJAS = []
-OBJETIVOS = []
-PAREDES = []
-
-
-
-for pared in mapa_resultante[2]:
-    #problem_variables.append("pared{}").format(pared+1)
-    PAREDES.append("pared{}").format(pared+1)
-
-for caja_obj in mapa_resultante[2]:
-    CAJAS.append("caja{}").format(caja_obj+1)
-    OBJETIVOS.append("objetivo{}").format(caja_obj+1)
-
-problem_variables = PAREDES + OBJETIVOS + CAJAS + "PJ"
-
-domains = {}
-
-columnas = list(range(mapa_resultante[1]))
-filas = list(range(mapa_resultante[0]))
-
-casilleros = [
-    (fil, col)
-    for fil in filas
-    for col in columnas
-]
+    problem_variables = []
+    CAJAS = []
+    OBJETIVOS = []
+    PAREDES = []
 
 
-for variable in problem_variables:
-    domains[variable] = casilleros
+
+    for pared in cantidad_paredes:
+        #problem_variables.append("pared{}").format(pared+1)
+        PAREDES.append("pared{}").format(pared+1)
+
+    #la cantidad de cajas y objetivos es la misma
+    for caja_obj in cantidad_paredes:
+        CAJAS.append("caja{}").format(caja_obj+1)
+        OBJETIVOS.append("objetivo{}").format(caja_obj+1)
+
+    problem_variables = PAREDES + OBJETIVOS + CAJAS + "PJ"
+
+    domains = {}
+
+    lista_columnas = list(range(columnas))
+    lista_filas = list(range(filas))
+
+    casilleros = [
+        (fil, col)
+        for fil in lista_filas
+        for col in lista_columnas
+    ]
 
 
-constraints = []
+    for variable in problem_variables:
+        domains[variable] = casilleros
 
-def different(variables, values):
-    celda1, celda2 = values
-    return celda1 != celda2
 
+    constraints = []
+
+    def different(problem_variables, values):
+        celda1, celda2 = values
+        return celda1 != celda2
+
+
+        
+    # las cajas, paredes y pj no pueden estar en el mismo lugar
+    PJ_CAJAS_PAREDES = "PJ" + CAJAS + PAREDES
+    for celda1, celda2 in combinations(PJ_CAJAS_PAREDES,2):
+        constraints.append(((celda1, celda2), different))
 
     
-# las cajas, paredes y pj no pueden estar en el mismo lugar
-PJ_CAJAS_PAREDES = "PJ" + CAJAS + PAREDES
-for celda1, celda2 in combinations(PJ_CAJAS_PAREDES,2):
-    constraints.append(((celda1, celda2), different))
 
+    # restriccion global para mirar que no todas las cajas esten en los objetivos
 
+    # TODO 2:
+    # agregar todas las restricciones de que sean diferentes las celdas dentro de cada mega-cuadrado (de 3x3)
 
-# restriccion global para mirar que no todas las cajas esten en los objetivos
+    problem = CspProblem(problem_variables, domains, constraints)
+    solution = backtrack(problem)
 
-# TODO 2:
-# agregar todas las restricciones de que sean diferentes las celdas dentro de cada mega-cuadrado (de 3x3)
-
-problem = CspProblem(problem_variables, domains, constraints)
-solution = backtrack(problem)
-
-print("Solution:")
-print(solution)
+    #print("Solution:")
+    #print(solution)
