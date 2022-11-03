@@ -13,53 +13,14 @@ from simpleai.search import (
 from simpleai.search.viewers import WebViewer, BaseViewer
 
 
-        #((fila_pj,columna_pj), ListaCajas, cantidad_movimientos)
-# inicio_Jugador = (1,1)
-          #pos jugador     pos cajas
-# INITIAL = ((1,1), ((2,2),(2,3)), 10)
-
-
-# OBJETIVOS = [
-#     (1,1),
-#     (1,5)
-# ]
-# pj_inicial = (2,3)
-# cajas = [(1,2),(1,4)]
-# #PAREDES
-# PAREDES = [
-#     (0,0),
-#     (0,1),
-#     (0,2),
-#     (0,3),
-#     (0,4),
-#     (0,5),
-#     (0,6),
-
-#     (1,0),
-#     (1,6),
-
-#     (2,0),
-#     (2,6),
-
-#     (3,0),
-#     (3,1),
-#     (3,2),
-#     (3,3),
-#     (3,4),
-#     (3,5),
-#     (3,6),
-# ] 
-
-
-
-#una función jugar que recibirá como parámetros el mapa (paredes), 
+# una función jugar que recibirá como parámetros el mapa (paredes), 
 # las posiciones actuales de las cajas y el jugador, las posiciones objetivos,
 #  y la cantidad máxima de movimientos
 
 
 def jugar(paredes,cajas,objetivos, jugador,maximos_movimientos):
-            #todas las posiciones respetan (fila,columna)
-            #tuplca con la posición del jugar, array de tuplas con pusición de las cajas, cantidad máxima de movimientos
+    # todas las posiciones respetan (fila,columna)
+    # tuplca con la posición del jugar, array de tuplas con pusición de las cajas, cantidad máxima de movimientos
     #INITIAL = (jugador, tuple(tuple(caja) for caja in cajas),maximos_movimientos)   
 
     # cambiar para no hacer esta asignación
@@ -70,13 +31,18 @@ def jugar(paredes,cajas,objetivos, jugador,maximos_movimientos):
     #secuencia de movimientos
     secuencia_movimientos = []
 
+    tuple_max_fila = max(paredes, key=lambda tup: tup[0])
+    tuple_max_col = max(paredes, key=lambda tup: tup[1])
+
+    max_fila, _ = tuple_max_fila
+    _, max_col = tuple_max_col
+
     pasos = astar(Sokoban((jugador, tuple(tuple(caja) for caja in cajas),maximos_movimientos),
                         tuple(tuple(obj) for obj in objetivos),
-                        tuple(tuple(pared) for pared in paredes)))
+                        tuple(tuple(pared) for pared in paredes),  max_fila, max_col), True)
     for accion, estado in pasos.path():
         if accion is not None:
             secuencia_movimientos.append(accion[2])
-            #print("Action:", accion[2], "Cajas:", estado[1])
     
     return secuencia_movimientos
 
@@ -92,10 +58,12 @@ def calcularAdy(fila,columna,accion):
 
 class Sokoban(SearchProblem):
 
-    def __init__(self,INITIAL, OBJETIVOS, PAREDES):
+    def __init__(self,INITIAL, OBJETIVOS, PAREDES, max_fila, max_col):
         self.INITIAL = INITIAL
         self.OBJETIVOS = OBJETIVOS
         self.PAREDES = PAREDES
+        self.max_fila = max_fila
+        self.max_col = max_col
         super().__init__(INITIAL)
 
     def actions(self, state):
@@ -114,14 +82,15 @@ class Sokoban(SearchProblem):
         for (destino, direccion) in adyacentes:
             #if direccion == "izquierda":
             fila, columna = destino
-            ady_caja = calcularAdy(fila,columna,direccion)
-            if destino not in self.PAREDES and destino not in cajas:
-                #no hay ningún obstaculo, muevo
-                acciones_disponibles.append((destino, "mov",direccion))
-            elif destino not in self.PAREDES and destino in cajas:
-                #si no es pared, hay una caja
-                if ady_caja not in self.PAREDES and ady_caja not in cajas:
-                    acciones_disponibles.append((destino, "caja",direccion))
+            if fila >= 0 and fila <= self.max_fila and columna >= 0 and columna <= self.max_col:
+                ady_caja = calcularAdy(fila,columna,direccion)
+                if destino not in self.PAREDES and destino not in cajas:
+                    #no hay ningún obstaculo, muevo
+                    acciones_disponibles.append((destino, "mov",direccion))
+                elif destino not in self.PAREDES and destino in cajas:
+                    #si no es pared, hay una caja
+                    if ady_caja not in self.PAREDES and ady_caja not in cajas:
+                        acciones_disponibles.append((destino, "caja",direccion))
                 
         return acciones_disponibles
             
@@ -172,7 +141,6 @@ class Sokoban(SearchProblem):
         # llegar al objetivo más cercano
         _ , cajas, _ = state
         heuristica = 0
-        #print(OBJETIVOS)
         for caja in cajas:
             if caja not in self.OBJETIVOS:
                 f_caja, c_caja = caja
@@ -181,9 +149,3 @@ class Sokoban(SearchProblem):
                     objetivo_cercano.append(abs(f_caja - f_obj) + abs(c_caja - c_obj))
                 heuristica += min(objetivo_cercano)
         return heuristica
-
-
-
-
-#movimientos = jugar(PAREDES,cajas,pj_inicial,OBJETIVOS,20)
-
